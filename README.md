@@ -1,25 +1,41 @@
 # rolldate [![npm](https://img.shields.io/npm/v/rolldate.svg)](https://www.npmjs.com/package/rolldate) [![npm](https://img.shields.io/npm/dm/rolldate.svg)](https://www.npmjs.com/package/rolldate)
-此插件为[jquery-date](https://github.com/weijhfly/jqueryDatePlugin "jquery-date")的全新版本，主要为了解决旧版参数设计不够合理、滑动效率不高、依赖jquery、没有可选的主题风格等问题，并增加了回调函数，使插件有更大的灵活性。
-## 2019/05/24 3.0版本更新
-上一个版本为2.1.5, 新版本(从3.0.0开始)的改动：
 
-1. 使用方式由new rolldate.Date改为new Rolldate;  
-2. 回调函数调整：tapBefore更名为init，confirmBefore更名为confirm，取消confirmEnd，增加cancel;  
-3. 日期格式(format)调整为无限制，可根据规则随意组合;      
+This plugin is a new version of [jquery-date](https://github.com/weijhfly/jqueryDatePlugin "jquery-date"), primarily designed to address issues such as unreasonable parameter design, low scrolling efficiency, dependency on jQuery, lack of optional theme styles, etc. It also introduces callback functions for greater flexibility.
 
-## 2019/02/03重要版本更新
-上一个版本为1.5.1, 新版本(从2.0.0开始)与此前版本的不同之处：
+## Version 3.0 Update (2019/05/24)
 
-1. 将滑动插件由iscroll替换为better-scroll，提升了兼容性;  
-2. 改变了界面风格，操作更加方便;  
-3. 取消了rolldate.css文件，只需引入js即可;  
-4. 移除了主题风格、日期初始化的滑动时间设置；  
+The previous version was 2.1.5. Changes in the new version (starting from 3.0.0):
 
-注意2.0.0之前的版本将不再维护，如有需要请访问：[旧版rolldate](https://weijhfly.github.io/rolldate-index2.html "rolldate")
-## 演示
-[rolldate](https://weijhfly.github.io/rolldate-index.html "rolldate")(下方直接扫码即可体验)  
+1. The usage changed from `new rolldate.Date` to `new Rolldate`.
+2. Callback functions were adjusted: `tapBefore` renamed to `init`, `confirmBefore` renamed to `confirm`, `confirmEnd` removed, and `cancel` added.
+3. The date format (format) is now unrestricted and can be freely combined according to rules.
+
+## Important Version Update (2019/02/03)
+
+The previous version was 1.5.1. The new version (starting from 2.0.0) differs from earlier versions in the following ways:
+
+1. Replaced the scrolling plugin from iscroll to better-scroll, improving compatibility.
+2. Changed the interface style for easier operation.
+3. Removed the `rolldate.css` file; only the JS file needs to be included.
+4. Removed theme styles and sliding time settings for date initialization.
+
+**Note**: Versions prior to 2.0.0 will no longer be maintained. For previous versions, please visit: [Old rolldate](https://weijhfly.github.io/rolldate-index2.html "rolldate")
+
+## Demo
+
+Experience the [rolldate](https://weijhfly.github.io/rolldate-index.html "rolldate") (scan the QR code below for a direct experience):
 
 ![rolldate](https://weijhfly.github.io/images/rolldate-demo.jpg)
+
+## Usage
+
+### ES6
+```js
+import Rolldate from 'rolldate';
+new Rolldate({
+  el: '#date'
+});
+
 
 ## 使用方式
 ### es6
