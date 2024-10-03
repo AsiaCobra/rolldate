@@ -59,11 +59,12 @@ Rolldate.prototype = {
         DD:'rolldate-day',
         hh:'rolldate-hour',
         mm:'rolldate-min',
-        ss:'rolldate-sec'
+        ss:'rolldate-sec',
+        A: 'rolldate-ampm' // Add this line
       },
       opts:{//插件默认配置
         el:'',
-        format:'YYYY-MM-DD',
+        format:'YYYY-MM-DD', // Add 'A' for AM/PM
         beginYear:2000,
         endYear:2100,
         init:null,
@@ -72,7 +73,7 @@ Rolldate.prototype = {
         cancel:null,
         minStep:1,
         trigger:'tap',
-        lang:{title:'选择日期', cancel:'取消', confirm:'确认', year:'年', month:'月', day:'日', hour:'时', min:'分', sec:'秒'}
+        lang:{title:'选择日期', cancel:'取消', confirm:'确认', year:'年', month:'月', day:'日', hour:'时', min:'分', sec:'秒', am:'上午', pm:'下午'} // Add AM/PM
       }
     };
   },
@@ -152,6 +153,11 @@ Rolldate.prototype = {
           ul += `<li class="wheel-item ${itemClass}" data-index="${domMndex}">${o<10? '0'+o : o}${lang.sec}</li>`;
           domMndex ++;
         }
+      } else if(f == 'A'){ // Add AM/PM selection
+        ['AM', 'PM'].forEach((period, index) => {
+          itemClass = (date.getHours() < 12 && period === 'AM') || (date.getHours() >= 12 && period === 'PM') ? 'active' : '';
+          ul += `<li class="wheel-item ${index} ${itemClass}" data-index="${index}">${lang[period.toLowerCase()]}</li>`;
+        });
       }
       ul += '</ul></div>'
     }
@@ -209,6 +215,12 @@ Rolldate.prototype = {
             $('#'+domId['DD']+' ul').innerHTML = li;
             _this.scroll['DD'].refresh();
           }
+        }
+
+        // Add When scrolling ends for hour, update AM/PM
+        if(that.wrapper.id === domId['hh'] && _this.scroll['A']){
+          const period = parseInt( _this.scroll['hh'].selectedIndex ) < 12 ? 0 : 1;
+          _this.scroll['A'].wheelTo(period);
         }
       })
 
@@ -384,7 +396,7 @@ Rolldate.prototype = {
     }, 300);
   },
   getSelected: function(scroll){
-    return $('#'+scroll.wrapper.id+' li', 1)[scroll.getSelectedIndex()].innerText.replace(/\D/g, '');
+    return $('#'+scroll.wrapper.id+' li', 1)[scroll.getSelectedIndex()].innerText.replace(/\D/g, '') || $('#'+scroll.wrapper.id+' li', 1)[scroll.getSelectedIndex()].innerText;
   }
 }
 Rolldate.version = version;
