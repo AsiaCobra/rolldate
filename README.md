@@ -70,22 +70,22 @@ seajs.use('rolldate',function(undefined){
 });
 ```
 ## 参数、方法说明
-名称|必填|默认值|说明
+Name|Required|Default|Description
 ---|:-:|:-:|---
-el|否|无|绑定插件的dom元素，插件内部使用document.querySelector，<br>也可以直接传递dom元素对象，只支持单个
-format|否|'YYYY-MM-DD'|日期格式，无限制。规则：年-YYYY 月-MM 日-DD 时-hh 分-mm 秒-ss 使用/、-、空格、:之一分隔，可随意组合
-beginYear|否|2000|日期开始年份
-endYear|否|2100|日期结束年份
-value|否|无|日期初始化的默认值，列如'2018-03-18'
-lang|否|年、月、日...|配置插件语言，默认：title:'选择日期',cancel:'取消',confirm:'确认',<br>year:'年',month:'月',day:'日',hour:'时',min:'分',sec:'秒'
-minStep|否|1|分钟按指定数分隔
-init|否|null|插件触发前的回调函数，return false可阻止插件执行
-moveEnd|否|null|插件滚动后的回调函数，函数返回一个参数(better-scroll实例)
-confirm|否|null|确认按钮触发前的回调函数，return false可阻止插件执行，<br>return其他值可修改日期，函数返回一个参数(选中的日期)
-cancel|否|null|插件取消时触发的回调函数
-trigger|否|'tap'|默认使用tap解决移动端click事件300ms延迟，可选click替换tap。注意使用tap会阻止其他绑定的click事件的触发
-show|否|无|主动触发插件，当trigger为tap时，主动触发插件应该使用此方法
-hide|否|无|主动隐藏插件  
+el|No|None|The DOM element to which the plugin is bound. The plugin uses `document.querySelector` internally. <br>You can also directly pass a DOM element object, only supports a single element.
+format|No|'YYYY-MM-DD'|Date format, no restrictions. Rules: Year-YYYY Month-MM Day-DD Hour-hh Minute-mm Second-ss AM/PM-A Use one of /, -, space, : as separators, can be freely combined.
+beginYear|No|2000|Start year of the date
+endYear|No|2100|End year of the date
+value|No|None|Default value for date initialization, e.g., '2018-03-18'
+lang|No|Year, Month, Day...|Configure the plugin language, default: title:'Select Date', cancel:'Cancel', confirm:'Confirm',<br>year:'Year', month:'Month', day:'Day', hour:'Hour', min:'Minute', sec:'Second'
+minStep|No|1|Minutes are divided by the specified number
+init|No|null|Callback function before the plugin is triggered, return false to prevent the plugin from executing
+moveEnd|No|null|Callback function after the plugin scrolls, the function returns one parameter (better-scroll instance)
+confirm|No|null|Callback function before the confirm button is triggered, return false to prevent the plugin from executing, <br>return other values to modify the date, the function returns one parameter (selected date)
+cancel|No|null|Callback function triggered when the plugin is canceled
+trigger|No|'tap'|Default is to use tap to solve the 300ms delay of the click event on mobile devices, you can choose click to replace tap. Note that using tap will prevent other bound click events from being triggered
+show|No|None|Actively trigger the plugin, when trigger is tap, actively trigger the plugin should use this method
+hide|No|None|Actively hide the plugin  
 
 ```js
 //完整参数、方法示例
