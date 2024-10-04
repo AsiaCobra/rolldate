@@ -256,6 +256,10 @@ Rolldate.prototype = {
       _this.scroll[FormatArr[_i]] = new bscroll_min('#' + $id, {
         wheel: {
           selectedIndex: 0
+        },
+        mouseWheel: {
+          speed: 20,
+          invert: false
         }
       });
 

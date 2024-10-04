@@ -331,6 +331,13 @@
 			}
 
 			function confirmBooking(startTime, endTime, day) {
+				
+				startTime = startTime.replace(' AM', '');
+				startTime = startTime.replace(' PM', '');
+
+				endTime = endTime.replace(' AM', '');
+				endTime = endTime.replace(' PM', '');
+
 				const selectedInfoDiv = document.getElementById('selected-info');
 				const startDateTime = new Date('' + day.date + 'T' + startTime + ':00');
 				const endDateTime = new Date('' + day.date + 'T' + endTime + ':00');
