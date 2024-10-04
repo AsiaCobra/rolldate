@@ -100,59 +100,84 @@ Rolldate.prototype = {
       FormatArr = config.format.split(/-|\/|\s|:/g),
       len = FormatArr.length,
       ul = '',
-      date = config.el? ($(config.el).bindDate || new Date()) : (_this.bindDate || new Date()),
+      date = config.el ? ($(config.el).bindDate || new Date()) : (_this.bindDate || new Date()),
       itemClass = '',
       lang = config.lang;
 
-    for(let i=0; i<len; i++){
-      let f = FormatArr[i],
-        domMndex = 0;
+    let startDateStr = $(config.el).getAttribute('data-start'),
+    endDateStr = $(config.el).getAttribute('data-end'),
+    // Set a default date for today
+    defaultDate = new Date().toISOString().split('T')[0];
 
-      ul += '<div id="'+ domId[f]+'"><ul class="wheel-scroll">';
+    let startDate = config.el ? new Date(startDateStr.includes('-') ? startDateStr : defaultDate + 'T' + startDateStr) : new Date(config.beginYear, 0, 1),
+        endDate = config.el ? new Date(endDateStr.includes('-') ? endDateStr : defaultDate + 'T' + endDateStr) : new Date(config.endYear, 11, 31, 23, 59, 59);
 
-      if(f == 'YYYY'){
-        for(let j=config.beginYear; j<=config.endYear; j++){
-          itemClass = j == date.getFullYear()? 'active':'';
+    // Check if the dates are valid
+    if (isNaN(startDate.getTime())) {
+        startDate = new Date(config.beginYear, 0, 1);
+    }
+    if (isNaN(endDate.getTime())) {
+        endDate = new Date(config.endYear, 11, 31, 23, 59, 59);
+    }
 
-          ul += `<li class="wheel-item ${itemClass}" data-index="${domMndex}">${j}${lang.year}</li>`;
-          domMndex ++;
-        }
-      }else if(f == 'MM'){
-        for(let k=1; k<=12; k++){
-          itemClass = k == date.getMonth() + 1? 'active':'';
+    for (let i = 0; i < len; i++) {
+        let f = FormatArr[i],
+            domMndex = 0;
 
-          ul += `<li class="wheel-item ${itemClass}" data-index="${domMndex}">${k<10? '0'+k : k}${lang.month}</li>`;
-          domMndex ++;
-        }
-      }else if(f == 'DD'){
-        let day = _this.getMonthlyDay(date.getFullYear(), date.getMonth() + 1);
-        for(let l=1; l<=day; l++){
-          itemClass = l == date.getDate()? 'active':'';
+        ul += '<div id="' + domId[f] + '"><ul class="wheel-scroll">';
 
-          ul += `<li class="wheel-item ${itemClass}" data-index="${domMndex}">${l<10? '0'+l : l}${lang.day}</li>`;
-          domMndex ++;
-        }
-      }else if(f == 'hh'){
-        for(let m=0; m<=23; m++){
-          itemClass = m == date.getHours()? 'active':'';
+        if (f == 'YYYY') {
+            for (let j = startDate.getFullYear(); j <= endDate.getFullYear(); j++) {
+                itemClass = j == date.getFullYear() ? 'active' : '';
 
-          ul += `<li class="wheel-item ${itemClass}" data-index="${domMndex}">${m<10? '0'+m : m}${lang.hour}</li>`;
-          domMndex ++;
-        }
-      }else if(f == 'mm'){
-        for(let n=0; n<=59; n+=config.minStep){
-          itemClass = n == date.getMinutes()? 'active':'';
+                ul += '<li class="wheel-item ' + itemClass + '" data-value="' + j + '" data-index="' + domMndex + '">' + j + lang.year + '</li>';
+                domMndex++;
+            }
+        } else if (f == 'MM') {
+            let startMonth = (startDate.getFullYear() == date.getFullYear()) ? startDate.getMonth() + 1 : 1;
+            let endMonth = (endDate.getFullYear() == date.getFullYear()) ? endDate.getMonth() + 1 : 12;
+            for (let k = startMonth; k <= endMonth; k++) {
+                itemClass = k == date.getMonth() + 1 ? 'active' : '';
 
-          ul += `<li class="wheel-item ${itemClass}" data-index="${domMndex}">${n<10? '0'+n : n}${lang.min}</li>`;
-          domMndex ++;
-        }
-      }else if(f == 'ss'){
-        for(let o=0; o<=59; o++){
-          itemClass = o == date.getSeconds()? 'active':'';
+                ul += '<li class="wheel-item ' + itemClass + '" data-value="' + k + '" data-index="' + domMndex + '">' + (k < 10 ? '0' + k : k) + lang.month + '</li>';
+                domMndex++;
+            }
+        } else if (f == 'DD') {
+            let startDay = (startDate.getFullYear() == date.getFullYear() && startDate.getMonth() == date.getMonth()) ? startDate.getDate() : 1;
+            let endDay = (endDate.getFullYear() == date.getFullYear() && endDate.getMonth() == date.getMonth()) ? endDate.getDate() : _this.getMonthlyDay(date.getFullYear(), date.getMonth() + 1);
+            for (let l = startDay; l <= endDay; l++) {
+                itemClass = l == date.getDate() ? 'active' : '';
 
-          ul += `<li class="wheel-item ${itemClass}" data-index="${domMndex}">${o<10? '0'+o : o}${lang.sec}</li>`;
-          domMndex ++;
-        }
+                ul += '<li class="wheel-item ' + itemClass + '" data-value="' + l + '" data-index="' + domMndex + '">' + (l < 10 ? '0' + l : l) + lang.day + '</li>';
+                domMndex++;
+            }
+        } else if (f == 'hh') {
+            let startHour = (startDate.getFullYear() == date.getFullYear() && startDate.getMonth() == date.getMonth() && startDate.getDate() == date.getDate()) ? startDate.getHours() : 0;
+            let endHour = (endDate.getFullYear() == date.getFullYear() && endDate.getMonth() == date.getMonth() && endDate.getDate() == date.getDate()) ? endDate.getHours() : 23;
+            for (let m = startHour; m <= endHour; m++) {
+                itemClass = m == date.getHours() ? 'active' : '';
+
+                ul += '<li class="wheel-item ' + itemClass + '" data-value="' + m + '" data-index="' + domMndex + '">' + (m < 10 ? '0' + m : m) + lang.hour + '</li>';
+                domMndex++;
+            }
+        } else if (f == 'mm') {
+            let startMinute = (startDate.getFullYear() == date.getFullYear() && startDate.getMonth() == date.getMonth() && startDate.getDate() == date.getDate() && startDate.getHours() == date.getHours()) ? startDate.getMinutes() : 0;
+            let endMinute = (endDate.getFullYear() == date.getFullYear() && endDate.getMonth() == date.getMonth() && endDate.getDate() == date.getDate() && endDate.getHours() == date.getHours()) ? endDate.getMinutes() : 59;
+            for (let n = startMinute; n <= endMinute; n += config.minStep) {
+                itemClass = n == date.getMinutes() ? 'active' : '';
+
+                ul += '<li class="wheel-item ' + itemClass + '" data-value="' + n + '" data-index="' + domMndex + '">' + (n < 10 ? '0' + n : n) + lang.min + '</li>';
+                domMndex++;
+            }
+        } else if (f == 'ss') {
+            let startSecond = (startDate.getFullYear() == date.getFullYear() && startDate.getMonth() == date.getMonth() && startDate.getDate() == date.getDate() && startDate.getHours() == date.getHours() && startDate.getMinutes() == date.getMinutes()) ? startDate.getSeconds() : 0;
+            let endSecond = (endDate.getFullYear() == date.getFullYear() && endDate.getMonth() == date.getMonth() && endDate.getDate() == date.getDate() && endDate.getHours() == date.getHours() && endDate.getMinutes() == date.getMinutes()) ? endDate.getSeconds() : 59;
+            for (let o = startSecond; o <= endSecond; o++) {
+                itemClass = o == date.getSeconds() ? 'active' : '';
+
+                ul += '<li class="wheel-item ' + itemClass + '" data-value="' + o + '" data-index="' + domMndex + '">' + (o < 10 ? '0' + o : o) + lang.sec + '</li>';
+                domMndex++;
+            }
       } else if(f == 'A'){ // Add AM/PM selection
         ['AM', 'PM'].forEach((period, index) => {
           itemClass = (date.getHours() < 12 && period === 'AM') || (date.getHours() >= 12 && period === 'PM') ? 'active' : '';
@@ -217,9 +242,26 @@ Rolldate.prototype = {
           }
         }
 
+        // Update minutes when hour changes
+        if(that.wrapper.id === domId['hh'] && _this.scroll['mm']){
+            let startMinute = (startDate.getFullYear() == date.getFullYear() && startDate.getMonth() == date.getMonth() && startDate.getDate() == date.getDate() && startDate.getHours() == parseInt( _this.getSelected(_this.scroll['hh'])  ) ) ? startDate.getMinutes() : 0;
+            let endMinute = (endDate.getFullYear() == date.getFullYear() && endDate.getMonth() == date.getMonth() && endDate.getDate() == date.getDate() && endDate.getHours() == date.getHours()) ? endDate.getMinutes() : 59;
+            let domMndex = 0;
+            let li = '';
+            for (let n = startMinute; n <= endMinute; n += config.minStep) {
+                itemClass = n == date.getMinutes() ? 'active' : '';
+
+                li += '<li class="wheel-item ' + itemClass + '" data-value="' + n + '" data-index="' + domMndex + '">' + (n < 10 ? '0' + n : n) + lang.min + '</li>';
+                domMndex++;
+            }
+
+            $('#'+domId['mm']+' ul').innerHTML = li;
+            _this.scroll['mm'].refresh();
+        }
+
         // Add When scrolling ends for hour, update AM/PM
         if(that.wrapper.id === domId['hh'] && _this.scroll['A']){
-          const period = parseInt( _this.scroll['hh'].selectedIndex ) < 12 ? 0 : 1;
+          const period = parseInt( _this.getSelected(_this.scroll['hh']) ) < 12 ? 0 : 1;
           _this.scroll['A'].wheelTo(period);
         }
       })
@@ -346,9 +388,14 @@ Rolldate.prototype = {
         el = $(config.el);
         if(el.nodeName.toLowerCase() == 'input'){
           el.value = date;
+          //dispatch Change event
+          el.dispatchEvent(new Event('change', { bubbles: true }));
         }else{
           el.innerText = date;
+          // Dispatch confirm event and pass the date
+          el.dispatchEvent(new CustomEvent('confirm', { detail: { date: newDate } }));
         }
+
         el.bindDate = newDate;
       }else{
         _this.bindDate = newDate;
