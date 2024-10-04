@@ -165,8 +165,8 @@ Rolldate.prototype = {
     // Set a default date for today
     defaultDate = new Date().toISOString().split('T')[0];
 
-    var startDate = config.el ? new Date(startDateStr.includes('-') ? startDateStr : defaultDate + 'T' + startDateStr) : new Date(config.beginYear, 0, 1),
-        endDate = config.el ? new Date(endDateStr.includes('-') ? endDateStr : defaultDate + 'T' + endDateStr) : new Date(config.endYear, 11, 31, 23, 59, 59);
+    var startDate = startDateStr ? new Date(startDateStr.includes('-') ? startDateStr : defaultDate + 'T' + startDateStr) : new Date(config.beginYear, 0, 1),
+        endDate = endDateStr ? new Date(endDateStr.includes('-') ? endDateStr : defaultDate + 'T' + endDateStr) : new Date(config.endYear, 11, 31, 23, 59, 59);
 
     // Check if the dates are valid
     if (isNaN(startDate.getTime())) {
