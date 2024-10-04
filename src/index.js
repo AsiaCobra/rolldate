@@ -245,7 +245,7 @@ Rolldate.prototype = {
         // Update minutes when hour changes
         if(that.wrapper.id === domId['hh'] && _this.scroll['mm']){
             let startMinute = (startDate.getFullYear() == date.getFullYear() && startDate.getMonth() == date.getMonth() && startDate.getDate() == date.getDate() && startDate.getHours() == parseInt( _this.getSelected(_this.scroll['hh'])  ) ) ? startDate.getMinutes() : 0;
-            let endMinute = (endDate.getFullYear() == date.getFullYear() && endDate.getMonth() == date.getMonth() && endDate.getDate() == date.getDate() && endDate.getHours() == date.getHours()) ? endDate.getMinutes() : 59;
+            let endMinute = (endDate.getFullYear() == date.getFullYear() && endDate.getMonth() == date.getMonth() && endDate.getDate() == date.getDate() && endDate.getHours() == parseInt( _this.getSelected(_this.scroll['hh'])  ) ) ? endDate.getMinutes() : 59;
             let domMndex = 0;
             let li = '';
             for (let n = startMinute; n <= endMinute; n += config.minStep) {

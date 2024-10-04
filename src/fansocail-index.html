@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+		<style>
+			body {
+				font-family: Arial, sans-serif;
+				background-color: white;
+			}
+		
+			.time-window {
+				border: 1px solid #000;
+				padding: 10px;
+				margin: 5px 0;
+			}
+		
+			.time-window.booked {
+				background-color: #f8d7da;
+				cursor: not-allowed;
+			}
+		
+			.time-window.closed {
+				background-color: #cccccc;
+				cursor: not-allowed;
+			}
+		
+			.time-window.available {
+				background-color: #d4edda;
+				cursor: pointer;
+			}
+		
+			#booking-options {
+				display: none;
+				margin-top: 20px;
+			}
+		
+			#selected-info {
+				margin-top: 20px;
+			}
+		
+			#json-debug {
+				margin: 20px 0;
+				padding: 10px;
+				background-color: #f0f0f0;
+				border: 1px solid #ccc;
+				font-family: monospace;
+				white-space: pre-wrap;
+			}
+		</style>
+</head>
+<body>
+    <div id="json-debug"></div>
+    <div id="time-slots"></div>
+    <div id="booking-options" style="display: none;">
+        <label for="start-time">Start Time:</label>
+        <!-- <select id="start-time"></select> -->
+		<input type="text" name="start-time" id="start-time" placeholder="hh:mm:ss A">
+
+        <label id="end-time-label" for="end-time" style="display: none;">End Time:</label>
+        <!-- <select id="end-time" style="display: none;"></select> -->
+		<input type="text" name="end-time" id="end-time" style="display:none;" placeholder="hh:mm:ss A">
+        <button id="confirm-booking">Confirm Booking</button>
+    </div>
+    <div id="selected-info"></div>
+     <script>
+		window.onload = function () {
+			new Rolldate({
+				el: '#start-time',
+				format: 'hh:mm A',
+				lang: {
+					title: 'Select Time', cancel: 'Cancel', confirm: 'Confirm',
+					year: 'year', month: ' Month ', day: ' day ', hour: ' hour ', min: ' minute ', sec: ' second ',
+					am: 'AM', pm: 'PM'
+
+				},
+				minStep:5
+			})
+			new Rolldate({
+				el: '#end-time',
+				format: 'hh:mm A',
+				lang: {
+					title: 'Select Time', cancel: 'Cancel', confirm: 'Confirm',
+					year: 'year', month: ' Month ', day: ' day ', hour: ' hour ', min: ' minute ', sec: ' second ',
+					am: 'AM', pm: 'PM'
+
+				},
+				minStep: 5
+			})
+		}
+
+    </script>
+	<script>
+		(function() {
+			const jsonData = {
+				"timezone": "Asia/Hong_Kong",
+				"booking_window_days": 3,
+				"min_booking_time": 30,
+				"max_booking_time": 90,
+				"time_between_bookings": 15,
+				"working_hours": { "start": "08:00", "end": "17:00" },
+				"days": [
+					{
+						"date": "2024-10-01",
+						"booked": [
+							{ "start": "09:45", "end": "10:45" },
+							{ "start": "12:00", "end": "13:00" }
+						]
+					},
+					{
+						"date": "2024-10-02",
+						"booked": [
+							{ "start": "10:30", "end": "11:30" }
+						]
+					},
+					{
+						"date": "2024-10-03",
+						"booked": []
+					},
+					{
+						"date": "2024-10-04",
+						"closed": true
+					},
+					{
+						"date": "2024-10-05",
+						"closed": true
+					}
+				]
+			};
+
+			const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+			// Debug: Display the JSON data on the page
+			document.getElementById('json-debug').textContent = JSON.stringify(jsonData, null, 4);
+
+			function convertTimeToUserZone (date, time, fromTimezone, toTimezone) {
+				const dateTimeString = '' + date + 'T' + time + ':00';
+				const creatorTime = new Date(dateTimeString);
+				const utcTime = new Date(creatorTime.toLocaleString('en-US', { timeZone: 'UTC' }));
+				const userTime = new Date(utcTime.toLocaleString('en-US', { timeZone: toTimezone }));
+
+
+				return userTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+			}
+			 function generateAvailableTimes(day, workingHours, minBookingTime, timeBetweenBookings) {
+				const availableTimes = [];
+				let currentTime = new Date('' + day.date + 'T' + workingHours.start + ':00');
+				const endOfDay = new Date('' + day.date + 'T' + workingHours.end + ':00');
+
+				let lastBookedEnd = currentTime;
+
+				day.booked.forEach((booking) => {
+					const bookedStart = new Date('' + day.date + 'T' + booking.start + ':00');
+					const bookedEnd = new Date('' + day.date + 'T' + booking.end + ':00');
+
+					const availableEnd = new Date(bookedStart.getTime() - timeBetweenBookings * 60000);
+					const nextAvailableStart = new Date(bookedEnd.getTime() + timeBetweenBookings * 60000);
+
+					if (lastBookedEnd < availableEnd) {
+						availableTimes.push({
+							start: lastBookedEnd,
+							end: availableEnd
+						});
+					}
+
+					lastBookedEnd = nextAvailableStart;
+				});
+
+				if (lastBookedEnd < endOfDay) {
+					availableTimes.push({
+						start: lastBookedEnd,
+						end: endOfDay
+					});
+				}
+
+				return availableTimes;
+			}
+
+			function renderTimeSlots() {
+				const timeSlotsContainer = document.getElementById('time-slots');
+				timeSlotsContainer.innerHTML = '';
+
+				jsonData.days.forEach(day => {
+					const dayHeader = document.createElement('h3');
+					dayHeader.textContent = 'Date: ' + day.date;
+					timeSlotsContainer.appendChild(dayHeader);
+
+					if (day.closed) {
+						const closedSlotDiv = document.createElement('div');
+						closedSlotDiv.classList.add('time-window', 'closed');
+						closedSlotDiv.textContent = 'Closed' + day.date;
+						timeSlotsContainer.appendChild(closedSlotDiv);
+					} else {
+						const availableTimes = generateAvailableTimes(day, jsonData.working_hours, jsonData.min_booking_time, jsonData.time_between_bookings);
+
+						availableTimes.forEach(avail => {
+							const timeSlotDiv = document.createElement('div');
+							timeSlotDiv.classList.add('time-window', 'available');
+
+							const startCreatorTime = avail.start.toTimeString().split(' ')[0].substring(0, 5);
+							const endCreatorTime = avail.end.toTimeString().split(' ')[0].substring(0, 5);
+
+							const startUserTime = convertTimeToUserZone(day.date, startCreatorTime, jsonData.timezone, userTimeZone);
+							const endUserTime = convertTimeToUserZone(day.date, endCreatorTime, jsonData.timezone, userTimeZone);
+
+							timeSlotDiv.innerHTML = 'Available: <br>' +
+						"Creator's Time: " + startCreatorTime + ' - ' + endCreatorTime + ' (' + jsonData.timezone + ')<br>' +
+						'Your Time: ' + startUserTime + ' - ' + endUserTime + ' (' + userTimeZone + ')';
+
+							timeSlotDiv.addEventListener('click', () => handleAvailableClick(day, avail));
+							timeSlotsContainer.appendChild(timeSlotDiv);
+						});
+					}
+				});
+			}
+
+			function handleAvailableClick(day, availableWindow) {
+				const bookingOptionsDiv = document.getElementById('booking-options');
+				bookingOptionsDiv.style.display = 'block';
+
+				const startTimeSelect = document.getElementById('start-time');
+				const endTimeSelect = document.getElementById('end-time');
+				const endTimeLabel = document.getElementById('end-time-label');
+
+				startTimeSelect.innerHTML = '';
+				endTimeSelect.innerHTML = '';
+
+				// const defaultStartOption = document.createElement('option');
+				// defaultStartOption.value = '';
+				// defaultStartOption.textContent = 'Select a start time';
+				// startTimeSelect.appendChild(defaultStartOption);
+
+				// const defaultEndOption = document.createElement('option');
+				// defaultEndOption.value = '';
+				// defaultEndOption.textContent = 'Select an end time';
+				// endTimeSelect.appendChild(defaultEndOption);
+
+				endTimeLabel.style.display = 'none';
+				endTimeSelect.style.display = 'none';
+
+				const startTimes = generateStartTimes(day, availableWindow.start.toTimeString().split(' ')[0].substring(0, 5), availableWindow.end.toTimeString().split(' ')[0].substring(0, 5), jsonData.min_booking_time, jsonData.time_between_bookings);
+
+				// Set data-start and data-end attributes on the select elements
+				startTimeSelect.setAttribute('data-start', availableWindow.start.toTimeString().split(' ')[0].substring(0, 5));
+				startTimeSelect.setAttribute('data-end', availableWindow.end.toTimeString().split(' ')[0].substring(0, 5));
+
+				// startTimes.forEach(time => {
+				// 	const startOption = document.createElement('option');
+				// 	startOption.value = time;
+				// 	startOption.textContent = time;
+				// 	startTimeSelect.appendChild(startOption);
+				// });
+
+				startTimeSelect.addEventListener('change', () => {
+					var selectedStartTime = startTimeSelect.value;
+
+					endTimeSelect.innerHTML = '';
+
+					// const defaultEndOption = document.createElement('option');
+					// defaultEndOption.value = '';
+					// defaultEndOption.textContent = 'Select an end time';
+					// endTimeSelect.appendChild(defaultEndOption);
+
+					//Replace AM/PM with 24 hour format
+					selectedStartTime = selectedStartTime.replace(' AM', '');
+					selectedStartTime = selectedStartTime.replace(' PM', '');
+					const endTimes = generateEndTimes(day, selectedStartTime, jsonData.min_booking_time, jsonData.max_booking_time, availableWindow.end.toTimeString().split(' ')[0].substring(0, 5));
+
+					// Set data-start and data-end attributes on the select elements
+					endTimeSelect.setAttribute('data-start', selectedStartTime);
+					endTimeSelect.setAttribute('data-end', availableWindow.end.toTimeString().split(' ')[0].substring(0, 5));
+					// endTimes.forEach(endTime => {
+					// 	const endOption = document.createElement('option');
+					// 	endOption.value = endTime;
+					// 	endOption.textContent = endTime;
+					// 	endTimeSelect.appendChild(endOption);
+					// });
+
+					endTimeLabel.style.display = 'block';
+					endTimeSelect.style.display = 'block';
+				});
+
+				const confirmButton = document.getElementById('confirm-booking');
+				const newConfirmButton = confirmButton.cloneNode(true);
+				confirmButton.parentNode.replaceChild(newConfirmButton, confirmButton);
+
+				newConfirmButton.addEventListener('click', () => {
+					const selectedStartTime = startTimeSelect.value;
+					const selectedEndTime = endTimeSelect.value;
+
+					if (!selectedStartTime || !selectedEndTime) {
+						alert('Please select both start and end times.');
+						return;
+					}
+
+					confirmBooking(selectedStartTime, selectedEndTime, day);
+				});
+			}
+
+			function generateStartTimes(day, start, end, minBookingTime, gap) {
+				let startTime = new Date('' + day.date + 'T' + start + ':00');
+				const endTime = new Date('' + day.date + 'T' + end + ':00');
+				const times = [];
+
+				const latestValidStart = new Date(endTime.getTime() - minBookingTime * 60000);
+
+				while (startTime <= latestValidStart) {
+					const timeString = startTime.toTimeString().split(' ')[0].substring(0, 5);
+					times.push(timeString);
+					startTime.setMinutes(startTime.getMinutes() + 5);
+				}
+
+				return times;
+			}
+
+			function generateEndTimes(day, startTime, minBookingTime, maxBookingTime, availableWindowEnd) {
+				let start = new Date('' + day.date + 'T' + startTime + ':00');
+				const availableEndTime = new Date('' + day.date + 'T' + availableWindowEnd + ':00');
+				const times = [];
+
+				let currentEndTime = new Date(start.getTime() + minBookingTime * 60000);
+
+				while (currentEndTime <= availableEndTime) {
+					const timeString = currentEndTime.toTimeString().split(' ')[0].substring(0, 5);
+					times.push(timeString);
+					currentEndTime.setMinutes(currentEndTime.getMinutes() + 5);
+				}
+
+				return times;
+			}
+
+			function confirmBooking(startTime, endTime, day) {
+				const selectedInfoDiv = document.getElementById('selected-info');
+				const startDateTime = new Date('' + day.date + 'T' + startTime + ':00');
+				const endDateTime = new Date('' + day.date + 'T' + endTime + ':00');
+
+				const durationInSeconds = (endDateTime - startDateTime) / 1000;
+				const durationInHours = Math.floor(durationInSeconds / 3600);
+				const durationInMinutes = (durationInSeconds % 3600) / 60;
+
+				selectedInfoDiv.innerHTML = 
+					'<p>Start Time: ' + startTime + '</p>' +
+					'<p>End Time: ' + endTime + '</p>' +
+					'<p>Duration: ' + durationInHours + ' hours and ' + durationInMinutes + ' minutes</p>';
+			}
+
+			renderTimeSlots();
+
+			
+		})();
+	</script>
+</body>
+</html>

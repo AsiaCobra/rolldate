@@ -292,7 +292,7 @@
           // Update minutes when hour changes
           if (that.wrapper.id === domId['hh'] && _this.scroll['mm']) {
             var _startMinute = startDate.getFullYear() == date.getFullYear() && startDate.getMonth() == date.getMonth() && startDate.getDate() == date.getDate() && startDate.getHours() == parseInt(_this.getSelected(_this.scroll['hh'])) ? startDate.getMinutes() : 0;
-            var _endMinute = endDate.getFullYear() == date.getFullYear() && endDate.getMonth() == date.getMonth() && endDate.getDate() == date.getDate() && endDate.getHours() == date.getHours() ? endDate.getMinutes() : 59;
+            var _endMinute = endDate.getFullYear() == date.getFullYear() && endDate.getMonth() == date.getMonth() && endDate.getDate() == date.getDate() && endDate.getHours() == parseInt(_this.getSelected(_this.scroll['hh'])) ? endDate.getMinutes() : 59;
             var _domMndex = 0;
             var _li = '';
             for (var _n = _startMinute; _n <= _endMinute; _n += config.minStep) {
