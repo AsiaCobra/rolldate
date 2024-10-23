@@ -58,6 +58,7 @@ Rolldate.prototype = {
         MM:'rolldate-month',
         DD:'rolldate-day',
         hh:'rolldate-hour',
+        hhmm:'rolldate-hourmin',
         mm:'rolldate-min',
         ss:'rolldate-sec',
         A: 'rolldate-ampm' // Add this line
@@ -160,6 +161,24 @@ Rolldate.prototype = {
                 ul += '<li class="wheel-item ' + itemClass + '" data-value="' + m + '" data-index="' + domMndex + '">' + (m < 10 ? '0' + m : m) + lang.hour + '</li>';
                 domMndex++;
             }
+        } else if (f == 'hhmm') {
+            let startHour = (startDate.getFullYear() == date.getFullYear() && startDate.getMonth() == date.getMonth() && startDate.getDate() == date.getDate()) ? startDate.getHours() : 0;
+            let endHour = (endDate.getFullYear() == date.getFullYear() && endDate.getMonth() == date.getMonth() && endDate.getDate() == date.getDate()) ? endDate.getHours() : 23;
+            let minStep = config.minStep || 1; // Default minute step is 1 if not provided
+
+            for (let m = startHour; m <= endHour; m++) {
+                let startMinute = (startDate.getFullYear() == date.getFullYear() && startDate.getMonth() == date.getMonth() && startDate.getDate() == date.getDate() && startDate.getHours() == m) ? startDate.getMinutes() : 0;
+                let endMinute = (endDate.getFullYear() == date.getFullYear() && endDate.getMonth() == date.getMonth() && endDate.getDate() == date.getDate() && endDate.getHours() == m) ? endDate.getMinutes() : 59;
+
+                for (let n = startMinute; n <= endMinute; n += minStep) {
+                    let hour = m < 10 ? '0' + m : m;
+                    let minute = n < 10 ? '0' + n : n;
+                    let isActive = (m == date.getHours() && n == date.getMinutes()) ? 'active' : '';
+
+                    ul += '<li class="wheel-item ' + isActive + '" data-value="' + hour + ':' + minute + '" data-index="' + domMndex + '">' + hour + ':' + minute + '</li>';
+                    domMndex++;
+                }
+            }
         } else if (f == 'mm') {
             let startMinute = (startDate.getFullYear() == date.getFullYear() && startDate.getMonth() == date.getMonth() && startDate.getDate() == date.getDate() && startDate.getHours() == date.getHours()) ? startDate.getMinutes() : 0;
             let endMinute = (endDate.getFullYear() == date.getFullYear() && endDate.getMonth() == date.getMonth() && endDate.getDate() == date.getDate() && endDate.getHours() == date.getHours()) ? endDate.getMinutes() : 59;
@@ -224,8 +243,8 @@ Rolldate.prototype = {
 
       let that = _this.scroll[FormatArr[i]],
         active = $(`#${$id} .active`),
-        index = active? active.getAttribute('data-index') : Math.round(date.getMinutes()/config.minStep);
- 
+        index = active? active.getAttribute('data-index') : 0;
+        // index = active? active.getAttribute('data-index') : Math.round(date.getMinutes()/config.minStep);
       that.wheelTo(index);
       // 滚动结束
       that.on('scrollEnd', () => {
@@ -266,6 +285,11 @@ Rolldate.prototype = {
         // Add When scrolling ends for hour, update AM/PM
         if(that.wrapper.id === domId['hh'] && _this.scroll['A']){
           const period = parseInt( _this.getSelected(_this.scroll['hh']) ) < 12 ? 0 : 1;
+          _this.scroll['A'].wheelTo(period);
+        }
+        // Add When scrolling ends for hour, update AM/PM
+        if(that.wrapper.id === domId['hhmm'] && _this.scroll['A']){
+          const period = parseInt( _this.getSelected(_this.scroll['hhmm']).split(':')[0] ) < 12 ? 0 : 1;
           _this.scroll['A'].wheelTo(period);
         }
       })
@@ -374,6 +398,10 @@ Rolldate.prototype = {
           newDate.setDate(d);
         }else if(f == 'hh'){
           newDate.setHours(d);
+        } else if(f == 'hhmm'){
+          let time = d.split(':');
+          newDate.setHours(time[0]);
+          newDate.setMinutes(time[1]);
         }else if(f == 'mm'){
           newDate.setMinutes(d);
         }else if(f == 'ss'){
@@ -447,6 +475,11 @@ Rolldate.prototype = {
     }, 300);
   },
   getSelected: function(scroll){
+
+    if ( scroll.wrapper.id === 'rolldate-hourmin' ) {
+      return $('#'+scroll.wrapper.id+' li', 1)[scroll.getSelectedIndex()].innerText;
+    }
+
     return $('#'+scroll.wrapper.id+' li', 1)[scroll.getSelectedIndex()].innerText.replace(/\D/g, '') || $('#'+scroll.wrapper.id+' li', 1)[scroll.getSelectedIndex()].innerText;
   }
 }

@@ -1,396 +1,366 @@
 <!DOCTYPE html>
-<html lang="zh-cn">
+<html lang="en">
 
 <head>
 	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
-	<title>rolldate demo</title>
-	<!-- bootstrap.css仅作为示例演示使用 -->
-	<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
-	<style type="text/css">
-		h1 {
-			font-size: 30px;
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			background-color: white;
 		}
 
-		.form-control[readonly] {
-			background: none;
+		.time-window {
+			border: 1px solid #000;
+			padding: 10px;
+			margin: 5px 0;
 		}
 
-		@media(max-width: 414px) {
-			.form-control {
-				font-size: 12px;
-			}
+		.time-window.booked {
+			background-color: #f8d7da;
+			cursor: not-allowed;
 		}
 
-		@media(max-width: 360px) {
-			.form-control {
-				font-size: 10px;
-				padding: 0 5px;
-			}
+		.time-window.closed {
+			background-color: #cccccc;
+			cursor: not-allowed;
 		}
 
-		@media(max-width: 320px) {
-			.col-xs-6 {
-				padding: 0 5px;
-			}
+		.time-window.available {
+			background-color: #d4edda;
+			cursor: pointer;
+		}
+
+		#booking-options {
+			display: none;
+			margin-top: 20px;
+		}
+
+		#selected-info {
+			margin-top: 20px;
+		}
+
+		#json-debug {
+			margin: 20px 0;
+			padding: 10px;
+			background-color: #f0f0f0;
+			border: 1px solid #ccc;
+			font-family: monospace;
+			white-space: pre-wrap;
 		}
 	</style>
 </head>
 
 <body>
-	<div class="jumbotron">
-		<div class="container">
-			<h1>rolldate 多格式、功能强大的移动端日期选择插件</h1>
-			<p>此为rolldate 3.0新版，使用better-scroll替换了iscroll,旧版请点击
-				<a href="https://weijhfly.github.io/rolldate-index2.html">返回旧版</a></p>
-		</div>
+	<div id="json-debug"></div>
+	<div id="time-slots"></div>
+	<div id="booking-options" style="display: none;">
+		<label for="start-time">Start Time:</label>
+		<!-- <select id="start-time"></select> -->
+		<input type="text" name="start-time" id="start-time" placeholder="hh:mm:ss A">
+
+		<label id="end-time-label" for="end-time" style="display: none;">End Time:</label>
+		<!-- <select id="end-time" style="display: none;"></select> -->
+		<input type="text" name="end-time" id="end-time" style="display:none;" placeholder="hh:mm:ss A">
+		<button id="confirm-booking">Confirm Booking</button>
 	</div>
-	<div class="container">
-		<h4><strong>支持格式：(无限制)</strong></h4>
-		<p><strong>规则：年-YYYY 月-MM 日-DD 时-hh 分-mm 秒-ss 使用/、-、空格、:之一分隔，可以随意组合</strong></p>
-		<p>例：YYYY-MM、YYYY-MM-DD、YYYY-MM-DD hh:mm、YYYY-MM-DD hh:mm:ss A、YYYY、MM、DD、hh:mm、hh:mm:ss A、YYYY-MM-DD hh、hh、mm、ss、YYYY/DD...</p>
-		<div class="row">
-			<div class="form-group clearfix">
-				<div class="col-xs-6">
-					<input readonly class="form-control" type="text" id="date-group1-1" placeholder="YYYY-MM">
-				</div>
-				<div class="col-xs-6">
-					<input readonly class="form-control" type="text" id="date-group1-2" placeholder="YYYY-MM-DD">
-				</div>
-			</div>
-			<div class="form-group clearfix">
-				<div class="col-xs-6">
-					<input readonly class="form-control" type="text" id="date-group1-3" placeholder="YYYY-MM-DD hh">
-				</div>
-				<div class="col-xs-6">
-					<input readonly class="form-control" type="text" id="date-group1-4" placeholder="YYYY-MM-DD hh:mm">
-				</div>
-			</div>
-			<div class="form-group clearfix">
-				<div class="col-xs-6">
-					<input readonly class="form-control" type="text" id="date-group1-5" placeholder="YYYY-MM-DD hh:mm:ss">
-				</div>
-				<div class="col-xs-6">
-					<input readonly class="form-control" type="text" id="date-group1-6" placeholder="hh:mm">
-				</div>
-			</div>
-			<div class="form-group clearfix">
-				<div class="col-xs-6">
-					<input readonly class="form-control" type="text" id="date-group1-7" placeholder="hh:mm:ss A">
-				</div>
-				<div class="col-xs-6">
-					<input readonly class="form-control" type="text" id="date-group1-8" placeholder="YYYY">
-				</div>
-			</div>
-			<div class="form-group clearfix">
-				<div class="col-xs-6">
-					<input readonly class="form-control" type="text" id="date-group1-9" placeholder="MM">
-				</div>
-				<div class="col-xs-6">
-					<input readonly class="form-control" type="text" id="date-group1-10" placeholder="DD">
-				</div>
-			</div>
-			<div class="form-group clearfix">
-				<div class="col-xs-6">
-					<input readonly class="form-control" type="text" id="date-group1-11" placeholder="hh">
-				</div>
-				<div class="col-xs-6">
-					<input readonly class="form-control" type="text" id="date-group1-12" placeholder="mm">
-				</div>
-			</div>
-			<div class="form-group clearfix">
-				<div class="col-xs-6">
-					<input readonly class="form-control" type="text" id="date-group1-13" placeholder="ss">
-				</div>
-				<div class="col-xs-6">
-					<input readonly class="form-control" type="text" id="date-group1-14" placeholder="YYYY/DD">
-				</div>
-			</div>
-		</div>
-
-		<h4><strong>回调函数：</strong></h4>
-		<p>init、moveEnd、confirm、cancel</p>
-		<div class="row">
-			<div class="form-group clearfix">
-				<div class="col-xs-6">
-					<input readonly class="form-control" type="text" id="date-group2-1" placeholder="完整实例">
-				</div>
-			</div>
-			<h5 class="col-xs-12">init return false可阻止插件运行</h5>
-			<div class="form-group clearfix">
-				<div class="col-xs-6">
-					<input readonly class="form-control" type="text" id="date-group2-2" placeholder="init">
-				</div>
-			</div>
-			<h5 class="col-xs-12">confirm return false阻止插件运行,return其他值可以修改日期展示</h5>
-			<div class="form-group clearfix">
-				<div class="col-xs-6">
-					<input readonly class="form-control" type="text" id="date-group2-3" placeholder="confirm修改日期">
-				</div>
-			</div>
-		</div>
-
-		<h4><strong>自定义语言</strong></h4>
-		<p>lang</p>
-		<div class="row">
-			<div class="form-group clearfix">
-				<div class="col-xs-6">
-					<input readonly class="form-control" type="text" id="date-group3-1" placeholder="lang">
-				</div>
-			</div>
-		</div>
-
-		<h4><strong>设置默认日期</strong></h4>
-		<p>value</p>
-		<div class="row">
-			<div class="form-group clearfix">
-				<div class="col-xs-6">
-					<input readonly class="form-control" type="text" id="date-group4-1" placeholder="设置默认日期">
-				</div>
-			</div>
-		</div>
-
-		<h4><strong>el传dom对象</strong></h4>
-		<div class="row">
-			<div class="form-group clearfix">
-				<div class="col-xs-6">
-					<input readonly class="form-control" type="text" id="date-group5-1" placeholder="el传dom对象">
-				</div>
-			</div>
-		</div>
-
-		<h4><strong>分钟间隔</strong></h4>
-		<div class="row">
-			<div class="form-group clearfix">
-				<div class="col-xs-6">
-					<input readonly class="form-control" type="text" id="date-group6-1" placeholder="分钟间隔5">
-				</div>
-			</div>
-		</div>
-		<h4><strong>使用原生click</strong></h4>
-		<div class="row">
-			<div class="form-group clearfix">
-				<div class="col-xs-6">
-					<input readonly class="form-control" type="text" id="date-group7-1" placeholder="trigger:'click'">
-				</div>
-			</div>
-		</div>
-		<h4><strong>不传el</strong></h4>
-		<div class="row">
-			<div class="form-group clearfix">
-				<div class="col-xs-6">
-					<input readonly class="form-control" type="text" id="date-group9-1" placeholder="不传el">
-				</div>
-			</div>
-		</div>
-		<h4><strong>其他示例</strong></h4>
-		<div class="row">
-			<div class="form-group clearfix">
-				<div class="col-xs-6">
-					<input readonly class="form-control" type="text" id="date-group8-1" placeholder="不能小于当前的日期">
-				</div>
-			</div>
-		</div>
-	</div>
+	<div id="selected-info"></div>
 	<script>
-		window.onload = function() {
-
-			// 格式
+		window.onload = function () {
 			new Rolldate({
-				el: '#date-group1-1',
-				format: 'YYYY-MM',
-				beginYear: 2000,
-				endYear: 2100
-			})
-			new Rolldate({
-				el: '#date-group1-2',
-				format: 'YYYY-MM-DD',
-				beginYear: 2000,
-				endYear: 2100
-			})
-			new Rolldate({
-				el: '#date-group1-3',
-				format: 'YYYY-MM-DD hh'
-			})
-			new Rolldate({
-				el: '#date-group1-4',
-				format: 'YYYY-MM-DD hh:mm',
-				beginYear: 2000,
-				endYear: 2100
-			})
-			new Rolldate({
-				el: '#date-group1-5',
-				format: 'YYYY-MM-DD hh:mm:ss',
-				beginYear: 2000,
-				endYear: 2100
-			})
-			new Rolldate({
-				el: '#date-group1-6',
-				format: 'hh:mm'
-			})
-			new Rolldate({
-				el: '#date-group1-7',
-				format: 'hh:mm:ss A',
+				el: '#start-time',
+				// format: 'hhmm A',
+				format: 'hh:mm A',
 				lang: {
 					title: 'Select Time', cancel: 'Cancel', confirm: 'Confirm',
 					year: 'year', month: ' Month ', day: ' day ', hour: ' hour ', min: ' minute ', sec: ' second ',
-					am: 'AM', pm:'PM'
+					am: 'AM', pm: 'PM'
 
-				}
-			})
-			new Rolldate({
-				el: '#date-group1-8',
-				format: 'YYYY',
-				beginYear: 2000,
-				endYear: 2100
-			})
-			new Rolldate({
-				el: '#date-group1-9',
-				format: 'MM'
-			})
-			new Rolldate({
-				el: '#date-group1-10',
-				format: 'DD'
-			})
-			new Rolldate({
-				el: '#date-group1-11',
-				format: 'hh'
-			})
-			new Rolldate({
-				el: '#date-group1-12',
-				format: 'mm'
-			})
-			new Rolldate({
-				el: '#date-group1-13',
-				format: 'ss'
-			})
-			new Rolldate({
-				el: '#date-group1-14',
-				format: 'YYYY/DD'
-			})
-			/* 回调函数
-			 * tips:	在vue及其他mvvm框架中使用时，在confirm中修改v-model绑定的数据即可
-			 */
-			new Rolldate({
-				el: '#date-group2-1',
-				format: 'YYYY-MM-DD',
-				beginYear: 2000,
-				endYear: 2100,
-				init: function() {
-					console.log('插件开始触发');
 				},
-				moveEnd: function(scroll) {
-					console.log(scroll)
-					console.log('滚动结束');
-				},
-				confirm: function(date) {
-					console.log(date)
-					console.log('确定按钮触发');
-				},
-				cancel: function() {
-					console.log('插件运行取消');
-				}
-			})
-			new Rolldate({
-				el: '#date-group2-2',
-				format: 'YYYY-MM-DD',
-				beginYear: 2000,
-				endYear: 2100,
-				init: function() {
-					if (1 == 1) {
-						console.log('阻止插件继续执行');
-						return false;
-					}
-				}
-			})
-			new Rolldate({
-				el: '#date-group2-3',
-				format: 'YYYY-MM-DD',
-				beginYear: 2000,
-				endYear: 2100,
-				confirm: function(date) {
-					return date.replace(/-/g, '/');
-				}
-			})
-			// 自定义语言
-			var lang = {
-				title: '自定义标题',
-				cancel: '取消',
-				confirm: '确认',
-				year: '年',
-				month: '月',
-				day: '日',
-				hour: '时',
-				min: '分',
-				sec: '秒'
-			};
-			// 如果某个值未修改可不传 以上同 var lang = {title:'自定义标题'} 允许传空串
-			new Rolldate({
-				el: '#date-group3-1',
-				format: 'YYYY-MM-DD',
-				beginYear: 2000,
-				endYear: 2100,
-				lang: lang
-			})
-
-			// 设置默认日期 内部使用document.getElementById('date').bindDate = new Date('2019/05/13');
-			new Rolldate({
-				el: '#date-group4-1',
-				format: 'YYYY-MM-DD',
-				beginYear: 2000,
-				endYear: 2100,
-				value: '2017-10-21' //或2017-10-21 23:52:50
-			})
-
-			// el传dom对象，只支持单个
-			new Rolldate({
-				el: document.getElementById('date-group5-1'),
-				format: 'YYYY-MM-DD',
-				beginYear: 2000,
-				endYear: 2100
-			})
-
-			// 分钟按指定数分隔
-			new Rolldate({
-				el: '#date-group6-1',
-				format: 'hh:mm',
 				minStep: 5
 			})
-			// 使用原生click
 			new Rolldate({
-				el: '#date-group7-1',
-				trigger: 'click'
-			})
-			// 不传el
-			var el = document.getElementById('date-group9-1');
-			el.addEventListener('click', function() {
-				rd.show();
-			})
-			var rd = new Rolldate({
-				confirm: function(date) {
-					el.value = date;
-				}
-			})
+				el: '#end-time',
+				// format: 'hhmm A',
+				format: 'hh:mm A',
+				lang: {
+					title: 'Select Time', cancel: 'Cancel', confirm: 'Confirm',
+					year: 'year', month: ' Month ', day: ' day ', hour: ' hour ', min: ' minute ', sec: ' second ',
+					am: 'AM', pm: 'PM'
 
-			// 其他示例
-			//日期判断
-			new Rolldate({
-				el: '#date-group8-1',
-				format: 'YYYY-MM-DD',
-				beginYear: 2000,
-				endYear: 2100,
-				confirm: function(date) {
-					var d = new Date(),
-						d1 = new Date(date.replace(/\-/g, "\/")),
-						d2 = new Date(d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate()); //如果非'YYYY-MM-DD'格式，需要另做调整
-
-					if (d1 < d2) {
-						alert('不能小于当前的日期');
-						return false;
-					}
-				}
+				},
+				minStep: 5
 			})
 		}
+
+	</script>
+	<script>
+			(function () {
+				const jsonData = {
+					"timezone": "Asia/Hong_Kong",
+					"booking_window_days": 3,
+					"min_booking_time": 30,
+					"max_booking_time": 90,
+					"time_between_bookings": 15,
+					"working_hours": { "start": "08:00", "end": "17:00" },
+					"days": [
+						{
+							"date": "2024-10-01",
+							"booked": [
+								{ "start": "09:45", "end": "10:45" },
+								{ "start": "12:00", "end": "13:00" }
+							]
+						},
+						{
+							"date": "2024-10-02",
+							"booked": [
+								{ "start": "10:30", "end": "11:30" }
+							]
+						},
+						{
+							"date": "2024-10-03",
+							"booked": []
+						},
+						{
+							"date": "2024-10-04",
+							"closed": true
+						},
+						{
+							"date": "2024-10-05",
+							"closed": true
+						}
+					]
+				};
+
+				const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+				// Debug: Display the JSON data on the page
+				document.getElementById('json-debug').textContent = JSON.stringify(jsonData, null, 4);
+
+				function convertTimeToUserZone(date, time, fromTimezone, toTimezone) {
+					const dateTimeString = '' + date + 'T' + time + ':00';
+					const creatorTime = new Date(dateTimeString);
+					const utcTime = new Date(creatorTime.toLocaleString('en-US', { timeZone: 'UTC' }));
+					const userTime = new Date(utcTime.toLocaleString('en-US', { timeZone: toTimezone }));
+
+
+					return userTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+				}
+				function generateAvailableTimes(day, workingHours, minBookingTime, timeBetweenBookings) {
+					const availableTimes = [];
+					let currentTime = new Date('' + day.date + 'T' + workingHours.start + ':00');
+					const endOfDay = new Date('' + day.date + 'T' + workingHours.end + ':00');
+
+					let lastBookedEnd = currentTime;
+
+					day.booked.forEach((booking) => {
+						const bookedStart = new Date('' + day.date + 'T' + booking.start + ':00');
+						const bookedEnd = new Date('' + day.date + 'T' + booking.end + ':00');
+
+						const availableEnd = new Date(bookedStart.getTime() - timeBetweenBookings * 60000);
+						const nextAvailableStart = new Date(bookedEnd.getTime() + timeBetweenBookings * 60000);
+
+						if (lastBookedEnd < availableEnd) {
+							availableTimes.push({
+								start: lastBookedEnd,
+								end: availableEnd
+							});
+						}
+
+						lastBookedEnd = nextAvailableStart;
+					});
+
+					if (lastBookedEnd < endOfDay) {
+						availableTimes.push({
+							start: lastBookedEnd,
+							end: endOfDay
+						});
+					}
+
+					return availableTimes;
+				}
+
+				function renderTimeSlots() {
+					const timeSlotsContainer = document.getElementById('time-slots');
+					timeSlotsContainer.innerHTML = '';
+
+					jsonData.days.forEach(day => {
+						const dayHeader = document.createElement('h3');
+						dayHeader.textContent = 'Date: ' + day.date;
+						timeSlotsContainer.appendChild(dayHeader);
+
+						if (day.closed) {
+							const closedSlotDiv = document.createElement('div');
+							closedSlotDiv.classList.add('time-window', 'closed');
+							closedSlotDiv.textContent = 'Closed' + day.date;
+							timeSlotsContainer.appendChild(closedSlotDiv);
+						} else {
+							const availableTimes = generateAvailableTimes(day, jsonData.working_hours, jsonData.min_booking_time, jsonData.time_between_bookings);
+
+							availableTimes.forEach(avail => {
+								const timeSlotDiv = document.createElement('div');
+								timeSlotDiv.classList.add('time-window', 'available');
+
+								const startCreatorTime = avail.start.toTimeString().split(' ')[0].substring(0, 5);
+								const endCreatorTime = avail.end.toTimeString().split(' ')[0].substring(0, 5);
+
+								const startUserTime = convertTimeToUserZone(day.date, startCreatorTime, jsonData.timezone, userTimeZone);
+								const endUserTime = convertTimeToUserZone(day.date, endCreatorTime, jsonData.timezone, userTimeZone);
+
+								timeSlotDiv.innerHTML = 'Available: <br>' +
+									"Creator's Time: " + startCreatorTime + ' - ' + endCreatorTime + ' (' + jsonData.timezone + ')<br>' +
+									'Your Time: ' + startUserTime + ' - ' + endUserTime + ' (' + userTimeZone + ')';
+
+								timeSlotDiv.addEventListener('click', () => handleAvailableClick(day, avail));
+								timeSlotsContainer.appendChild(timeSlotDiv);
+							});
+						}
+					});
+				}
+
+				function handleAvailableClick(day, availableWindow) {
+					const bookingOptionsDiv = document.getElementById('booking-options');
+					bookingOptionsDiv.style.display = 'block';
+
+					const startTimeSelect = document.getElementById('start-time');
+					const endTimeSelect = document.getElementById('end-time');
+					const endTimeLabel = document.getElementById('end-time-label');
+
+					startTimeSelect.innerHTML = '';
+					endTimeSelect.innerHTML = '';
+
+					// const defaultStartOption = document.createElement('option');
+					// defaultStartOption.value = '';
+					// defaultStartOption.textContent = 'Select a start time';
+					// startTimeSelect.appendChild(defaultStartOption);
+
+					// const defaultEndOption = document.createElement('option');
+					// defaultEndOption.value = '';
+					// defaultEndOption.textContent = 'Select an end time';
+					// endTimeSelect.appendChild(defaultEndOption);
+
+					endTimeLabel.style.display = 'none';
+					endTimeSelect.style.display = 'none';
+
+					const startTimes = generateStartTimes(day, availableWindow.start.toTimeString().split(' ')[0].substring(0, 5), availableWindow.end.toTimeString().split(' ')[0].substring(0, 5), jsonData.min_booking_time, jsonData.time_between_bookings);
+
+					// Set data-start and data-end attributes on the select elements
+					startTimeSelect.setAttribute('data-start', availableWindow.start.toTimeString().split(' ')[0].substring(0, 5));
+					startTimeSelect.setAttribute('data-end', availableWindow.end.toTimeString().split(' ')[0].substring(0, 5));
+
+					// startTimes.forEach(time => {
+					// 	const startOption = document.createElement('option');
+					// 	startOption.value = time;
+					// 	startOption.textContent = time;
+					// 	startTimeSelect.appendChild(startOption);
+					// });
+
+					startTimeSelect.addEventListener('change', () => {
+						var selectedStartTime = startTimeSelect.value;
+
+						endTimeSelect.innerHTML = '';
+
+						// const defaultEndOption = document.createElement('option');
+						// defaultEndOption.value = '';
+						// defaultEndOption.textContent = 'Select an end time';
+						// endTimeSelect.appendChild(defaultEndOption);
+
+						//Replace AM/PM with 24 hour format
+						selectedStartTime = selectedStartTime.replace(' AM', '');
+						selectedStartTime = selectedStartTime.replace(' PM', '');
+						const endTimes = generateEndTimes(day, selectedStartTime, jsonData.min_booking_time, jsonData.max_booking_time, availableWindow.end.toTimeString().split(' ')[0].substring(0, 5));
+						console.error(endTimes);
+						console.error(endTimes[endTimes.length - 1]);
+						// Set data-start and data-end attributes on the select elements
+						endTimeSelect.setAttribute('data-start', endTimes[0]);
+						endTimeSelect.setAttribute('data-end', availableWindow.end.toTimeString().split(' ')[0].substring(0, 5));
+						// endTimes.forEach(endTime => {
+						// 	const endOption = document.createElement('option');
+						// 	endOption.value = endTime;
+						// 	endOption.textContent = endTime;
+						// 	endTimeSelect.appendChild(endOption);
+						// });
+
+						endTimeLabel.style.display = 'block';
+						endTimeSelect.style.display = 'block';
+					});
+
+					const confirmButton = document.getElementById('confirm-booking');
+					const newConfirmButton = confirmButton.cloneNode(true);
+					confirmButton.parentNode.replaceChild(newConfirmButton, confirmButton);
+
+					newConfirmButton.addEventListener('click', () => {
+						const selectedStartTime = startTimeSelect.value;
+						const selectedEndTime = endTimeSelect.value;
+
+						if (!selectedStartTime || !selectedEndTime) {
+							alert('Please select both start and end times.');
+							return;
+						}
+
+						confirmBooking(selectedStartTime, selectedEndTime, day);
+					});
+				}
+
+				function generateStartTimes(day, start, end, minBookingTime, gap) {
+					let startTime = new Date('' + day.date + 'T' + start + ':00');
+					const endTime = new Date('' + day.date + 'T' + end + ':00');
+					const times = [];
+
+					const latestValidStart = new Date(endTime.getTime() - minBookingTime * 60000);
+
+					while (startTime <= latestValidStart) {
+						const timeString = startTime.toTimeString().split(' ')[0].substring(0, 5);
+						times.push(timeString);
+						startTime.setMinutes(startTime.getMinutes() + 5);
+					}
+
+					return times;
+				}
+
+				function generateEndTimes(day, startTime, minBookingTime, maxBookingTime, availableWindowEnd) {
+					let start = new Date('' + day.date + 'T' + startTime + ':00');
+					const availableEndTime = new Date('' + day.date + 'T' + availableWindowEnd + ':00');
+					const times = [];
+
+					let currentEndTime = new Date(start.getTime() + minBookingTime * 60000);
+
+					while (currentEndTime <= availableEndTime) {
+						const timeString = currentEndTime.toTimeString().split(' ')[0].substring(0, 5);
+						times.push(timeString);
+						currentEndTime.setMinutes(currentEndTime.getMinutes() + 5);
+					}
+
+					return times;
+				}
+
+				function confirmBooking(startTime, endTime, day) {
+
+					startTime = startTime.replace(' AM', '');
+					startTime = startTime.replace(' PM', '');
+
+					endTime = endTime.replace(' AM', '');
+					endTime = endTime.replace(' PM', '');
+
+					const selectedInfoDiv = document.getElementById('selected-info');
+					const startDateTime = new Date('' + day.date + 'T' + startTime + ':00');
+					const endDateTime = new Date('' + day.date + 'T' + endTime + ':00');
+
+					const durationInSeconds = (endDateTime - startDateTime) / 1000;
+					const durationInHours = Math.floor(durationInSeconds / 3600);
+					const durationInMinutes = (durationInSeconds % 3600) / 60;
+
+					selectedInfoDiv.innerHTML =
+						'<p>Start Time: ' + startTime + '</p>' +
+						'<p>End Time: ' + endTime + '</p>' +
+						'<p>Duration: ' + durationInHours + ' hours and ' + durationInMinutes + ' minutes</p>';
+				}
+
+				renderTimeSlots();
+
+
+			})();
 	</script>
 </body>
 

@@ -117,6 +117,7 @@
           MM: 'rolldate-month',
           DD: 'rolldate-day',
           hh: 'rolldate-hour',
+          hhmm: 'rolldate-hourmin',
           mm: 'rolldate-min',
           ss: 'rolldate-sec',
           A: 'rolldate-ampm' // Add this line
@@ -220,13 +221,31 @@
             ul += '<li class="wheel-item ' + itemClass + '" data-value="' + m + '" data-index="' + domMndex + '">' + (m < 10 ? '0' + m : m) + lang.hour + '</li>';
             domMndex++;
           }
-        } else if (f == 'mm') {
-          var startMinute = startDate.getFullYear() == date.getFullYear() && startDate.getMonth() == date.getMonth() && startDate.getDate() == date.getDate() && startDate.getHours() == date.getHours() ? startDate.getMinutes() : 0;
-          var endMinute = endDate.getFullYear() == date.getFullYear() && endDate.getMonth() == date.getMonth() && endDate.getDate() == date.getDate() && endDate.getHours() == date.getHours() ? endDate.getMinutes() : 59;
-          for (var n = startMinute; n <= endMinute; n += config.minStep) {
-            itemClass = n == date.getMinutes() ? 'active' : '';
+        } else if (f == 'hhmm') {
+          var _startHour = startDate.getFullYear() == date.getFullYear() && startDate.getMonth() == date.getMonth() && startDate.getDate() == date.getDate() ? startDate.getHours() : 0;
+          var _endHour = endDate.getFullYear() == date.getFullYear() && endDate.getMonth() == date.getMonth() && endDate.getDate() == date.getDate() ? endDate.getHours() : 23;
+          var minStep = config.minStep || 1; // Default minute step is 1 if not provided
 
-            ul += '<li class="wheel-item ' + itemClass + '" data-value="' + n + '" data-index="' + domMndex + '">' + (n < 10 ? '0' + n : n) + lang.min + '</li>';
+          for (var _m = _startHour; _m <= _endHour; _m++) {
+            var startMinute = startDate.getFullYear() == date.getFullYear() && startDate.getMonth() == date.getMonth() && startDate.getDate() == date.getDate() && startDate.getHours() == _m ? startDate.getMinutes() : 0;
+            var endMinute = endDate.getFullYear() == date.getFullYear() && endDate.getMonth() == date.getMonth() && endDate.getDate() == date.getDate() && endDate.getHours() == _m ? endDate.getMinutes() : 59;
+
+            for (var n = startMinute; n <= endMinute; n += minStep) {
+              var hour = _m < 10 ? '0' + _m : _m;
+              var minute = n < 10 ? '0' + n : n;
+              var isActive = _m == date.getHours() && n == date.getMinutes() ? 'active' : '';
+
+              ul += '<li class="wheel-item ' + isActive + '" data-value="' + hour + ':' + minute + '" data-index="' + domMndex + '">' + hour + ':' + minute + '</li>';
+              domMndex++;
+            }
+          }
+        } else if (f == 'mm') {
+          var _startMinute = startDate.getFullYear() == date.getFullYear() && startDate.getMonth() == date.getMonth() && startDate.getDate() == date.getDate() && startDate.getHours() == date.getHours() ? startDate.getMinutes() : 0;
+          var _endMinute = endDate.getFullYear() == date.getFullYear() && endDate.getMonth() == date.getMonth() && endDate.getDate() == date.getDate() && endDate.getHours() == date.getHours() ? endDate.getMinutes() : 59;
+          for (var _n = _startMinute; _n <= _endMinute; _n += config.minStep) {
+            itemClass = _n == date.getMinutes() ? 'active' : '';
+
+            ul += '<li class="wheel-item ' + itemClass + '" data-value="' + _n + '" data-index="' + domMndex + '">' + (_n < 10 ? '0' + _n : _n) + lang.min + '</li>';
             domMndex++;
           }
         } else if (f == 'ss') {
@@ -271,8 +290,8 @@
 
         var that = _this.scroll[FormatArr[_i]],
             active = $('#' + $id + ' .active'),
-            index = active ? active.getAttribute('data-index') : Math.round(date.getMinutes() / config.minStep);
-
+            index = active ? active.getAttribute('data-index') : 0;
+        // index = active? active.getAttribute('data-index') : Math.round(date.getMinutes()/config.minStep);
         that.wheelTo(index);
         // 滚动结束
         that.on('scrollEnd', function () {
@@ -295,14 +314,14 @@
 
           // Update minutes when hour changes
           if (that.wrapper.id === domId['hh'] && _this.scroll['mm']) {
-            var _startMinute = startDate.getFullYear() == date.getFullYear() && startDate.getMonth() == date.getMonth() && startDate.getDate() == date.getDate() && startDate.getHours() == parseInt(_this.getSelected(_this.scroll['hh'])) ? startDate.getMinutes() : 0;
-            var _endMinute = endDate.getFullYear() == date.getFullYear() && endDate.getMonth() == date.getMonth() && endDate.getDate() == date.getDate() && endDate.getHours() == parseInt(_this.getSelected(_this.scroll['hh'])) ? endDate.getMinutes() : 59;
+            var _startMinute2 = startDate.getFullYear() == date.getFullYear() && startDate.getMonth() == date.getMonth() && startDate.getDate() == date.getDate() && startDate.getHours() == parseInt(_this.getSelected(_this.scroll['hh'])) ? startDate.getMinutes() : 0;
+            var _endMinute2 = endDate.getFullYear() == date.getFullYear() && endDate.getMonth() == date.getMonth() && endDate.getDate() == date.getDate() && endDate.getHours() == parseInt(_this.getSelected(_this.scroll['hh'])) ? endDate.getMinutes() : 59;
             var _domMndex = 0;
             var _li = '';
-            for (var _n = _startMinute; _n <= _endMinute; _n += config.minStep) {
-              itemClass = _n == date.getMinutes() ? 'active' : '';
+            for (var _n2 = _startMinute2; _n2 <= _endMinute2; _n2 += config.minStep) {
+              itemClass = _n2 == date.getMinutes() ? 'active' : '';
 
-              _li += '<li class="wheel-item ' + itemClass + '" data-value="' + _n + '" data-index="' + _domMndex + '">' + (_n < 10 ? '0' + _n : _n) + lang.min + '</li>';
+              _li += '<li class="wheel-item ' + itemClass + '" data-value="' + _n2 + '" data-index="' + _domMndex + '">' + (_n2 < 10 ? '0' + _n2 : _n2) + lang.min + '</li>';
               _domMndex++;
             }
 
@@ -314,6 +333,11 @@
           if (that.wrapper.id === domId['hh'] && _this.scroll['A']) {
             var period = parseInt(_this.getSelected(_this.scroll['hh'])) < 12 ? 0 : 1;
             _this.scroll['A'].wheelTo(period);
+          }
+          // Add When scrolling ends for hour, update AM/PM
+          if (that.wrapper.id === domId['hhmm'] && _this.scroll['A']) {
+            var _period = parseInt(_this.getSelected(_this.scroll['hhmm']).split(':')[0]) < 12 ? 0 : 1;
+            _this.scroll['A'].wheelTo(_period);
           }
         });
       };
@@ -432,6 +456,10 @@
             newDate.setDate(d);
           } else if (f == 'hh') {
             newDate.setHours(d);
+          } else if (f == 'hhmm') {
+            var time = d.split(':');
+            newDate.setHours(time[0]);
+            newDate.setMinutes(time[1]);
           } else if (f == 'mm') {
             newDate.setMinutes(d);
           } else if (f == 'ss') {
@@ -504,6 +532,11 @@
       }, 300);
     },
     getSelected: function getSelected(scroll) {
+
+      if (scroll.wrapper.id === 'rolldate-hourmin') {
+        return $('#' + scroll.wrapper.id + ' li', 1)[scroll.getSelectedIndex()].innerText;
+      }
+
       return $('#' + scroll.wrapper.id + ' li', 1)[scroll.getSelectedIndex()].innerText.replace(/\D/g, '') || $('#' + scroll.wrapper.id + ' li', 1)[scroll.getSelectedIndex()].innerText;
     }
   };
